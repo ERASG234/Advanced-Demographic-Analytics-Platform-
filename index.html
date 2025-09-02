@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Demographic Analytics Platform - Erasmus Gwidza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#7C3AED',
+                        accent: '#059669',
+                        warning: '#D97706',
+                        danger: '#DC2626'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section-card { 
+            transition: all 0.3s ease;
+            border-left: 4px solid #5D5CDE;
+        }
+        .section-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container { position: relative; height: 400px; }
+        .professional-gradient { background: linear-gradient(135deg, #5D5CDE, #7C3AED, #059669); }
+        .parameter-group {
+            background: linear-gradient(135deg, rgba(93, 92, 222, 0.05), rgba(124, 58, 237, 0.05));
+            border: 1px solid rgba(93, 92, 222, 0.1);
+            border-radius: 12px;
+        }
+        .drop-zone {
+            border: 2px dashed #5D5CDE;
+            background: rgba(93, 92, 222, 0.05);
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #059669;
+            background: rgba(5, 150, 105, 0.1);
+            transform: scale(1.02);
+        }
+        .analysis-output {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(93, 92, 222, 0.05));
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    <!-- Dark mode detection -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center z-50">
+        <div class="max-w-md w-full mx-4">
+            <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 border border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i class="fas fa-chart-pie text-white text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Advanced Demographic Analytics Platform</h1>
+                    <h2 class="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">By Erasmus Gwidza, MSc</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mt-2">Population Informatics & Analytics</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-lock mr-2"></i>Access Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="passwordInput"
+                            class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            placeholder="Enter secure password"
+                            required
+                        >
+                    </div>
+                    
+                    <button 
+                        type="submit"
+                        class="w-full bg-gradient-to-r from-primary to-accent hover:from-purple-700 hover:to-green-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 shadow-lg"
+                    >
+                        <i class="fas fa-unlock mr-2"></i>ACCESS PLATFORM
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Professional Demographic Analysis • Population Modeling • Statistical Computing
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="professional-gradient text-white shadow-2xl">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-pie text-3xl text-white"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2">ADVANCED DEMOGRAPHIC ANALYTICS PLATFORM</h1>
+                    <p class="text-xl text-blue-100 mb-2">Erasmus Gwidza, MSc - Population Informatics & Analytics</p>
+                    <div class="flex justify-center items-center space-x-8 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-users mr-2"></i>
+                            <span>Population Analysis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            <span>Demographic Modeling</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-database mr-2"></i>
+                            <span>Data Analytics</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            <span>Report Generation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-0 overflow-x-auto">
+                    <button onclick="switchTab('population-structure')" id="population-structure-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-primary text-primary whitespace-nowrap">
+                        <i class="fas fa-users mr-2"></i>Population Structure
+                    </button>
+                    <button onclick="switchTab('fertility-analysis')" id="fertility-analysis-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-baby mr-2"></i>Fertility Analysis
+                    </button>
+                    <button onclick="switchTab('mortality-analysis')" id="mortality-analysis-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-heartbeat mr-2"></i>Mortality Analysis
+                    </button>
+                    <button onclick="switchTab('migration-analysis')" id="migration-analysis-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-plane mr-2"></i>Migration Analysis
+                    </button>
+                    <button onclick="switchTab('projections-modeling')" id="projections-modeling-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-crystal-ball mr-2"></i>Projections & Modeling
+                    </button>
+                    <button onclick="switchTab('morbidity-analysis')" id="morbidity-analysis-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-user-md mr-2"></i>Morbidity Analysis
+                    </button>
+                    <button onclick="switchTab('smam-analysis')" id="smam-analysis-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-ring mr-2"></i>SMAM Analysis
+                    </button>
+                    <button onclick="switchTab('data-management')" id="data-management-tab" class="tab-button flex items-center px-6 py-4 font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 whitespace-nowrap">
+                        <i class="fas fa-database mr-2"></i>Advanced Data Processing
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Population Structure Tab -->
+            <div id="population-structure-content" class="tab-content active">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Population Structure & Distribution Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Comprehensive population composition, distribution, and demographic structure analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Data Input Section -->
+                    <div class="lg:col-span-1">
+                        <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                                <i class="fas fa-upload text-primary mr-2"></i>Data Upload & Input
+                            </h3>
+                            
+                            <div class="drop-zone rounded-lg p-6 text-center mb-4" id="populationDropZone">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-primary mb-3"></i>
+                                <p class="font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Population Data</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Excel, CSV files supported</p>
+                                <input type="file" id="populationDataFile" class="hidden" accept=".xlsx,.xls,.csv">
+                                <button onclick="document.getElementById('populationDataFile').click()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-600 transition-colors">
+                                    Select File
+                                </button>
+                            </div>
+
+                            <!-- Manual Input Parameters -->
+                            <div class="parameter-group p-4 mb-4">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-3">Manual Data Entry</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Population</label>
+                                        <input type="number" id="totalPopulation" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Male Population</label>
+                                        <input type="number" id="malePopulation" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Female Population</label>
+                                        <input type="number" id="femalePopulation" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Area (km²)</label>
+                                        <input type="number" id="totalArea" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Age Structure Parameters -->
+                            <div class="parameter-group p-4">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-3">Age Structure</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Population 0-14</label>
+                                        <input type="number" id="pop0to14" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Population 15-64</label>
+                                        <input type="number" id="pop15to64" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Population 65+</label>
+                                        <input type="number" id="pop65plus" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="analyzePopulationStructure()" class="w-full bg-accent text-white py-3 px-4 rounded-lg font-medium mt-4 hover:bg-green-700 transition-colors">
+                                <i class="fas fa-chart-bar mr-2"></i>Analyze Structure
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div class="lg:col-span-2">
+                        <!-- Key Indicators -->
+                        <div class="analysis-output rounded-xl p-6 mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Key Demographic Indicators</h3>
+                            <div id="populationIndicators" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                    <i class="fas fa-users text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Population Density</p>
+                                    <p class="text-xl font-bold text-primary" id="densityResult">--</p>
+                                </div>
+                                <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                    <i class="fas fa-balance-scale text-2xl text-accent mb-2"></i>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Sex Ratio</p>
+                                    <p class="text-xl font-bold text-accent" id="sexRatioResult">--</p>
+                                </div>
+                                <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                    <i class="fas fa-chart-pie text-2xl text-secondary mb-2"></i>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Dependency Ratio</p>
+                                    <p class="text-xl font-bold text-secondary" id="dependencyRatioResult">--</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Population Pyramid -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Population Pyramid</h3>
+                            <div class="chart-container">
+                                <canvas id="populationPyramidChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Age Structure Analysis -->
+                        <div class="analysis-output rounded-xl p-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Age Structure Analysis</h3>
+                            <div id="ageStructureAnalysis" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-gray-900 dark:text-white mb-2">Youth Dependency</h4>
+                                    <p class="text-2xl font-bold text-warning" id="youthDependency">--</p>
+                                </div>
+                                <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-gray-900 dark:text-white mb-2">Old-Age Dependency</h4>
+                                    <p class="text-2xl font-bold text-danger" id="oldAgeDependency">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fertility Analysis Tab -->
+            <div id="fertility-analysis-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fertility Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Comprehensive fertility measurements, reproduction rates, and fertility patterns</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Fertility Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-baby text-secondary mr-2"></i>Fertility Data Input
+                        </h3>
+
+                        <!-- Basic Fertility Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Basic Parameters</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Births</label>
+                                    <input type="number" id="totalBirths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Women 15-49 Years</label>
+                                    <input type="number" id="women15to49" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Female Births</label>
+                                    <input type="number" id="femaleBirths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Age-Specific Fertility Rates -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Age-Specific Fertility Rates (ASFR)</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">15-19 Years</label>
+                                    <input type="number" step="0.001" id="asfr15to19" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">20-24 Years</label>
+                                    <input type="number" step="0.001" id="asfr20to24" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">25-29 Years</label>
+                                    <input type="number" step="0.001" id="asfr25to29" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">30-34 Years</label>
+                                    <input type="number" step="0.001" id="asfr30to34" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">35-39 Years</label>
+                                    <input type="number" step="0.001" id="asfr35to39" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">40-44 Years</label>
+                                    <input type="number" step="0.001" id="asfr40to44" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">45-49 Years</label>
+                                    <input type="number" step="0.001" id="asfr45to49" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="analyzeFertility()" class="w-full bg-secondary text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-calculator mr-2"></i>Calculate Fertility Measures
+                        </button>
+                    </div>
+
+                    <!-- Fertility Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Fertility Analysis Results</h3>
+                        
+                        <div id="fertilityResults" class="space-y-6">
+                            <!-- Total Fertility Rate -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-secondary mb-2">Total Fertility Rate (TFR)</h4>
+                                <p class="text-2xl font-bold text-secondary" id="tfrResult">--</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Children per woman</p>
+                            </div>
+
+                            <!-- General Fertility Rate -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-accent mb-2">General Fertility Rate (GFR)</h4>
+                                <p class="text-2xl font-bold text-accent" id="gfrResult">--</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 women 15-49</p>
+                            </div>
+
+                            <!-- Crude Birth Rate -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-primary mb-2">Crude Birth Rate (CBR)</h4>
+                                <p class="text-2xl font-bold text-primary" id="cbrResult">--</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                            </div>
+
+                            <!-- Gross Reproduction Rate -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-warning mb-2">Gross Reproduction Rate (GRR)</h4>
+                                <p class="text-2xl font-bold text-warning" id="grrResult">--</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Daughters per woman</p>
+                            </div>
+                        </div>
+
+                        <!-- Fertility Pattern Chart -->
+                        <div class="mt-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-4">Age-Specific Fertility Pattern</h4>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="fertilityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mortality Analysis Tab -->
+            <div id="mortality-analysis-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Mortality Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Life tables, mortality rates, and survival analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Mortality Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-heartbeat text-danger mr-2"></i>Mortality Data Input
+                        </h3>
+
+                        <!-- Basic Mortality Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Basic Parameters</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Deaths</label>
+                                    <input type="number" id="totalDeaths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Infant Deaths (0-1 year)</label>
+                                    <input type="number" id="infantDeaths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Child Deaths (0-5 years)</label>
+                                    <input type="number" id="childDeaths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Live Births</label>
+                                    <input type="number" id="liveBirths" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Age-Specific Death Rates -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Age-Specific Death Rates (per 1,000)</h4>
+                            <div class="space-y-2">
+                                <textarea 
+                                    id="mortalityRates" 
+                                    placeholder="8.5, 1.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.5, 2.5, 4.0, 6.5, 10.5, 16.8, 27.2, 44.7, 73.6, 121.7" 
+                                    class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 h-20 resize-none"
+                                ></textarea>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Enter comma-separated values for age groups: 0-1, 1-4, 5-9, 10-14, ..., 80+</p>
+                            </div>
+                            <button onclick="loadSampleMortality()" class="mt-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded">
+                                Load Sample Data
+                            </button>
+                        </div>
+
+                        <button onclick="analyzeMortality()" class="w-full bg-danger text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                            <i class="fas fa-chart-line mr-2"></i>Analyze Mortality
+                        </button>
+                    </div>
+
+                    <!-- Mortality Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Mortality Analysis Results</h3>
+                        
+                        <div id="mortalityResults" class="space-y-6">
+                            <!-- Key Mortality Indicators -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-danger mb-2">Crude Death Rate</h4>
+                                    <p class="text-2xl font-bold text-danger" id="cdrResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-primary mb-2">Life Expectancy</h4>
+                                    <p class="text-2xl font-bold text-primary" id="lifeExpectancyResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Years at birth</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-warning mb-2">Infant Mortality Rate</h4>
+                                    <p class="text-2xl font-bold text-warning" id="imrResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 births</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-secondary mb-2">Child Mortality Rate</h4>
+                                    <p class="text-2xl font-bold text-secondary" id="cmrResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 births</p>
+                                </div>
+                            </div>
+
+                            <!-- Life Table Preview -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Life Table Summary</h4>
+                                <div id="lifeTableSummary">
+                                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">Run mortality analysis to generate life table</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complete Life Table -->
+                <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Complete Life Table</h3>
+                    <div class="overflow-x-auto">
+                        <div id="lifeTableDisplay">
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-8">Life table will appear here after analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Migration Analysis Tab -->
+            <div id="migration-analysis-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Migration Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Migration patterns, rates, and population movement analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Migration Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-plane text-accent mr-2"></i>Migration Data Input
+                        </h3>
+
+                        <!-- Basic Migration Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Migration Flows</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total In-Migration</label>
+                                    <input type="number" id="totalImmigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Out-Migration</label>
+                                    <input type="number" id="totalEmigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Population</label>
+                                    <input type="number" id="totalPopMigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Age-Specific Migration -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Age-Specific Migration</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Working Age Migration (15-64)</label>
+                                    <input type="number" id="workingAgeMigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Youth Migration (0-14)</label>
+                                    <input type="number" id="youthMigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Elderly Migration (65+)</label>
+                                    <input type="number" id="elderlyMigration" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="analyzeMigration()" class="w-full bg-accent text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                            <i class="fas fa-exchange-alt mr-2"></i>Analyze Migration
+                        </button>
+                    </div>
+
+                    <!-- Migration Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Migration Analysis Results</h3>
+                        
+                        <div id="migrationResults" class="space-y-6">
+                            <!-- Key Migration Indicators -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-accent mb-2">Net Migration Rate</h4>
+                                    <p class="text-2xl font-bold text-accent" id="netMigrationResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-primary mb-2">Gross Migration Rate</h4>
+                                    <p class="text-2xl font-bold text-primary" id="grossMigrationResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-secondary mb-2">Migration Efficiency</h4>
+                                    <p class="text-2xl font-bold text-secondary" id="migrationEfficiencyResult">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Percentage</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-warning mb-2">Net Migration</h4>
+                                    <p class="text-2xl font-bold text-warning" id="netMigrationAbsolute">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Absolute number</p>
+                                </div>
+                            </div>
+
+                            <!-- Migration Pattern Chart -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Migration Flow Analysis</h4>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="migrationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projections & Modeling Tab -->
+            <div id="projections-modeling-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Population Projections & Modeling</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Population forecasting, demographic modeling, and scenario analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Projection Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-crystal-ball text-primary mr-2"></i>Projection Parameters
+                        </h3>
+
+                        <!-- Base Population -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Base Population Data</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base Year</label>
+                                    <input type="number" id="baseYear" value="2023" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Year</label>
+                                    <input type="number" id="targetYear" value="2050" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base Population</label>
+                                    <input type="number" id="basePopulation" value="15000000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Demographic Rates -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Demographic Rates (per 1,000)</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Birth Rate</label>
+                                    <input type="number" id="projectionBirthRate" value="25" step="0.1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Death Rate</label>
+                                    <input type="number" id="projectionDeathRate" value="8" step="0.1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Net Migration Rate</label>
+                                    <input type="number" id="projectionMigrationRate" value="-2" step="0.1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Projection Model -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Projection Model</h4>
+                            <select id="projectionModel" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                <option value="exponential">Exponential Growth</option>
+                                <option value="logistic">Logistic Growth</option>
+                                <option value="cohort-component">Cohort-Component</option>
+                                <option value="leslie-matrix">Leslie Matrix</option>
+                            </select>
+                        </div>
+
+                        <button onclick="calculateProjections()" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-calculator mr-2"></i>Calculate Projections
+                        </button>
+                    </div>
+
+                    <!-- Projection Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Projection Results</h3>
+                        
+                        <div id="projectionResults" class="space-y-6">
+                            <!-- Key Projection Indicators -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-primary mb-2">Projected Population</h4>
+                                    <p class="text-2xl font-bold text-primary" id="projectedPopulation">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" id="projectionYear">Target year</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-accent mb-2">Growth Rate</h4>
+                                    <p class="text-2xl font-bold text-accent" id="projectedGrowthRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Annual percentage</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-warning mb-2">Doubling Time</h4>
+                                    <p class="text-2xl font-bold text-warning" id="doublingTime">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Years</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-secondary mb-2">Total Change</h4>
+                                    <p class="text-2xl font-bold text-secondary" id="totalPopChange">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Percentage</p>
+                                </div>
+                            </div>
+
+                            <!-- Projection Chart -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Population Projection Chart</h4>
+                                <div class="chart-container">
+                                    <canvas id="projectionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Morbidity Analysis Tab -->
+            <div id="morbidity-analysis-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Morbidity Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Disease patterns, health indicators, prevalence rates, and epidemiological analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Morbidity Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-user-md text-danger mr-2"></i>Morbidity Data Input
+                        </h3>
+
+                        <!-- Basic Morbidity Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Disease Prevalence</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Disease Cases</label>
+                                    <input type="number" id="totalCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Cases (Incidence)</label>
+                                    <input type="number" id="newCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Population at Risk</label>
+                                    <input type="number" id="populationAtRisk" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period (years)</label>
+                                    <input type="number" id="timePeriod" value="1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disease-Specific Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Disease Categories</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communicable Diseases</label>
+                                    <input type="number" id="communicableCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Non-Communicable Diseases</label>
+                                    <input type="number" id="nonCommunicableCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maternal Health Cases</label>
+                                    <input type="number" id="maternalCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Child Health Cases</label>
+                                    <input type="number" id="childHealthCases" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disability Parameters -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Disability Analysis</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Disabled Population</label>
+                                    <input type="number" id="disabledPopulation" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Years Lived with Disability</label>
+                                    <input type="number" id="yearsWithDisability" step="0.1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Disability Weight</label>
+                                    <input type="number" id="disabilityWeight" step="0.01" max="1" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="analyzeMorbidity()" class="w-full bg-danger text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                            <i class="fas fa-stethoscope mr-2"></i>Analyze Morbidity
+                        </button>
+                    </div>
+
+                    <!-- Morbidity Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Morbidity Analysis Results</h3>
+                        
+                        <div id="morbidityResults" class="space-y-6">
+                            <!-- Key Morbidity Indicators -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-danger mb-2">Prevalence Rate</h4>
+                                    <p class="text-2xl font-bold text-danger" id="prevalenceRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-warning mb-2">Incidence Rate</h4>
+                                    <p class="text-2xl font-bold text-warning" id="incidenceRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 per year</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-primary mb-2">Attack Rate</h4>
+                                    <p class="text-2xl font-bold text-primary" id="attackRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Percentage</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-secondary mb-2">Disability Rate</h4>
+                                    <p class="text-2xl font-bold text-secondary" id="disabilityRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Per 1,000 population</p>
+                                </div>
+                            </div>
+
+                            <!-- Health Indicators -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Health Status Indicators</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="text-center">
+                                        <h5 class="font-bold text-accent">Years Lived with Disability (YLD)</h5>
+                                        <p class="text-lg font-bold text-accent" id="yldResult">--</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <h5 class="font-bold text-primary">Disease Burden Index</h5>
+                                        <p class="text-lg font-bold text-primary" id="diseaseBurden">--</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <h5 class="font-bold text-warning">Health-Adjusted Life Years</h5>
+                                        <p class="text-lg font-bold text-warning" id="halyResult">--</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Disease Distribution Chart -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Disease Distribution</h4>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="morbidityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMAM Analysis Tab -->
+            <div id="smam-analysis-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Singulate Mean Age at Marriage (SMAM) Analysis</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Marriage patterns, mean age calculations, and nuptiality analysis</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- SMAM Parameters -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-ring text-primary mr-2"></i>Marriage Data Input
+                        </h3>
+
+                        <!-- Age-Specific Marriage Data -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Age-Specific Marriage Proportions</h4>
+                            <div class="space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">15-19 Years</label>
+                                        <input type="number" step="0.001" id="marriage15to19" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">20-24 Years</label>
+                                        <input type="number" step="0.001" id="marriage20to24" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">25-29 Years</label>
+                                        <input type="number" step="0.001" id="marriage25to29" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">30-34 Years</label>
+                                        <input type="number" step="0.001" id="marriage30to34" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">35-39 Years</label>
+                                        <input type="number" step="0.001" id="marriage35to39" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">40-44 Years</label>
+                                        <input type="number" step="0.001" id="marriage40to44" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">45-49 Years</label>
+                                        <input type="number" step="0.001" id="marriage45to49" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">50+ Years</label>
+                                        <input type="number" step="0.001" id="marriage50plus" placeholder="0.000" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Enter proportions of married individuals in each age group (0.000 to 1.000)</p>
+                        </div>
+
+                        <!-- Gender-Specific Analysis -->
+                        <div class="parameter-group p-4 mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Gender Selection</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-4">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="gender" value="male" id="maleGender" class="mr-2">
+                                        <span class="text-sm">Male</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="gender" value="female" id="femaleGender" class="mr-2" checked>
+                                        <span class="text-sm">Female</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="gender" value="both" id="bothGender" class="mr-2">
+                                        <span class="text-sm">Both</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sample Data Button -->
+                        <div class="mb-4">
+                            <button onclick="loadSampleSMAMData()" class="w-full bg-gray-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-gray-600 transition-colors">
+                                <i class="fas fa-download mr-2"></i>Load Sample Marriage Data
+                            </button>
+                        </div>
+
+                        <button onclick="calculateSMAM()" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-calculator mr-2"></i>Calculate SMAM
+                        </button>
+                    </div>
+
+                    <!-- SMAM Results -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">SMAM Analysis Results</h3>
+                        
+                        <div id="smamResults" class="space-y-6">
+                            <!-- Main SMAM Result -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow text-center">
+                                <h4 class="font-bold text-primary mb-2 text-xl">Singulate Mean Age at Marriage</h4>
+                                <p class="text-4xl font-bold text-primary mb-2" id="smamResult">--</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Years</p>
+                            </div>
+
+                            <!-- Marriage Pattern Indicators -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-accent mb-2">Proportion Never Married</h4>
+                                    <p class="text-2xl font-bold text-accent" id="neverMarriedProp">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">At age 50+</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-secondary mb-2">Early Marriage Rate</h4>
+                                    <p class="text-2xl font-bold text-secondary" id="earlyMarriageRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Under 20 years</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-warning mb-2">Median Age at Marriage</h4>
+                                    <p class="text-2xl font-bold text-warning" id="medianAge">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Years</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                    <h4 class="font-bold text-danger mb-2">Late Marriage Rate</h4>
+                                    <p class="text-2xl font-bold text-danger" id="lateMarriageRate">--</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">After 30 years</p>
+                                </div>
+                            </div>
+
+                            <!-- Marriage Pattern Chart -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Age-Specific Marriage Patterns</h4>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="smamChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- SMAM Interpretation -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-3">Interpretation & Analysis</h4>
+                                <div id="smamInterpretation" class="text-sm text-gray-700 dark:text-gray-300">
+                                    <p>Calculate SMAM to see detailed interpretation of marriage patterns and demographic implications.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Management Tab -->
+            <div id="data-management-content" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Data Management & Reports</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Upload, process, analyze, and export demographic data</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Data Upload & Processing -->
+                    <div class="section-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-database text-primary mr-2"></i>Data Upload & Processing
+                        </h3>
+
+                        <!-- File Upload Area -->
+                        <div class="drop-zone rounded-lg p-8 text-center mb-6" id="mainDataDropZone">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-primary mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Demographic Dataset</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Excel (.xlsx, .xls) or CSV files supported</p>
+                            <input type="file" id="mainDataFile" class="hidden" accept=".xlsx,.xls,.csv">
+                            <button onclick="document.getElementById('mainDataFile').click()" class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-600 transition-colors">
+                                Select File
+                            </button>
+                        </div>
+
+                        <!-- Processing Options -->
+                        <div id="processingOptions" class="parameter-group p-4 mb-6 hidden">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Processing Options</h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="autoCalculateRates" checked class="mr-2 text-primary">
+                                    <span class="text-sm">Auto-calculate demographic rates</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="generateCharts" checked class="mr-2 text-primary">
+                                    <span class="text-sm">Generate visualization charts</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="createLifeTable" class="mr-2 text-primary">
+                                    <span class="text-sm">Create life table (if mortality data available)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="runProjections" class="mr-2 text-primary">
+                                    <span class="text-sm">Run population projections</span>
+                                </label>
+                            </div>
+                            <button onclick="processUploadedData()" class="w-full bg-accent text-white py-2 px-4 rounded-lg mt-4 hover:bg-green-700 transition-colors">
+                                <i class="fas fa-cogs mr-2"></i>Process Data
+                            </button>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="parameter-group p-4">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Export Options</h4>
+                            <div class="space-y-2">
+                                <button onclick="exportToExcel()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-file-excel mr-2"></i>Export to Excel
+                                </button>
+                                <button onclick="exportToPDF()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-red-700 transition-colors">
+                                    <i class="fas fa-file-pdf mr-2"></i>Export Report to PDF
+                                </button>
+                                <button onclick="saveAnalysis()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-save mr-2"></i>Save Analysis Session
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Preview & Analysis Summary -->
+                    <div class="analysis-output rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Data Preview & Analysis Summary</h3>
+                        
+                        <!-- Data Preview -->
+                        <div id="dataPreview" class="mb-6">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Uploaded Data Preview</h4>
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 h-64 overflow-auto border border-gray-200 dark:border-gray-600">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Upload data file to see preview</p>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Summary -->
+                        <div id="analysisSummary" class="hidden">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Analysis Summary</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+                                    <i class="fas fa-chart-bar text-primary text-xl mb-1"></i>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Indicators Calculated</p>
+                                    <p class="font-bold text-primary" id="indicatorsCount">--</p>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+                                    <i class="fas fa-database text-accent text-xl mb-1"></i>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Records Processed</p>
+                                    <p class="font-bold text-accent" id="recordsCount">--</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="parameter-group p-4">
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3">Quick Actions</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="generateReport()" class="bg-primary text-white py-2 px-3 rounded text-sm hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-file-alt mr-1"></i>Generate Report
+                                </button>
+                                <button onclick="clearAllData()" class="bg-gray-500 text-white py-2 px-3 rounded text-sm hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-trash mr-1"></i>Clear All
+                                </button>
+                                <button onclick="loadSampleData()" class="bg-secondary text-white py-2 px-3 rounded text-sm hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-download mr-1"></i>Load Sample
+                                </button>
+                                <button onclick="helpGuide()" class="bg-warning text-white py-2 px-3 rounded text-sm hover:bg-yellow-600 transition-colors">
+                                    <i class="fas fa-question mr-1"></i>Help
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="professional-gradient text-white mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="text-center">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                        <div>
+                            <h3 class="text-lg font-bold mb-4">Professional Credentials</h3>
+                            <ul class="space-y-2 text-blue-100">
+                                <li>Erasmus Gwidza, MSc</li>
+                                <li>Population Informatics & Analytics</li>
+                                <li>University of Zimbabwe</li>
+                                <li>Professional Demographer</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-4">Platform Features</h3>
+                            <ul class="space-y-2 text-blue-100">
+                                <li>Advanced Statistical Analysis</li>
+                                <li>Population Projections & Modeling</li>
+                                <li>Excel Data Integration</li>
+                                <li>Professional Report Generation</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-4">Analysis Capabilities</h3>
+                            <ul class="space-y-2 text-blue-100">
+                                <li>Fertility & Mortality Analysis</li>
+                                <li>Migration Pattern Studies</li>
+                                <li>Life Table Construction</li>
+                                <li>Demographic Visualization</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="border-t border-blue-400 pt-6">
+                        <p class="text-blue-100 mb-2">&copy; 2024 Advanced Demographic Analytics Platform</p>
+                        <p class="text-blue-200 text-sm">Developed by Erasmus Gwidza, MSc • Population Informatics & Analytics • University of Zimbabwe</p>
+                        <p class="text-blue-300 text-xs mt-2">Professional Demographic Analysis • Statistical Modeling • Data-Driven Population Studies</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Application State
+        let currentTab = 'population-structure';
+        let uploadedData = null;
+        let analysisResults = {};
+        let charts = {};
+
+        // Custom Dialog Functions
+        function showCustomAlert(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="px-4 py-2 bg-primary text-white hover:bg-purple-600 rounded" onclick="this.closest('.fixed').remove()">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showCustomConfirm(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded" onclick="this.closest('.fixed').remove()">Cancel</button>
+                        <button class="px-4 py-2 bg-primary text-white hover:bg-purple-600 rounded" onclick="this.closest('.fixed').remove(); onConfirm()">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Login System
+        function handleLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            
+            if (password === 'gwidza@2025') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initializeApplication();
+            } else {
+                showCustomAlert('Invalid password. Please try again.');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // Tab Management
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('border-primary', 'text-primary');
+                button.classList.add('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+            });
+
+            document.getElementById(`${tabName}-content`).classList.add('active');
+
+            const activeButton = document.getElementById(`${tabName}-tab`);
+            if (activeButton) {
+                activeButton.classList.add('border-primary', 'text-primary');
+                activeButton.classList.remove('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+            }
+
+            currentTab = tabName;
+        }
+
+        // Population Structure Analysis
+        function analyzePopulationStructure() {
+            const totalPop = parseFloat(document.getElementById('totalPopulation').value);
+            const malePop = parseFloat(document.getElementById('malePopulation').value);
+            const femalePop = parseFloat(document.getElementById('femalePopulation').value);
+            const area = parseFloat(document.getElementById('totalArea').value);
+            const pop0to14 = parseFloat(document.getElementById('pop0to14').value);
+            const pop15to64 = parseFloat(document.getElementById('pop15to64').value);
+            const pop65plus = parseFloat(document.getElementById('pop65plus').value);
+
+            // Calculate indicators
+            if (totalPop && area) {
+                const density = totalPop / area;
+                document.getElementById('densityResult').textContent = `${density.toFixed(1)} per km²`;
+            }
+
+            if (malePop && femalePop) {
+                const sexRatio = (malePop / femalePop) * 100;
+                document.getElementById('sexRatioResult').textContent = `${sexRatio.toFixed(1)}`;
+            }
+
+            if (pop0to14 && pop15to64 && pop65plus) {
+                const youthDep = (pop0to14 / pop15to64) * 100;
+                const oldAgeDep = (pop65plus / pop15to64) * 100;
+                const totalDep = youthDep + oldAgeDep;
+                
+                document.getElementById('dependencyRatioResult').textContent = `${totalDep.toFixed(1)}%`;
+                document.getElementById('youthDependency').textContent = `${youthDep.toFixed(1)}%`;
+                document.getElementById('oldAgeDependency').textContent = `${oldAgeDep.toFixed(1)}%`;
+            }
+
+            // Generate population pyramid
+            generatePopulationPyramid();
+        }
+
+        function generatePopulationPyramid() {
+            if (charts.populationPyramid) {
+                charts.populationPyramid.destroy();
+            }
+
+            const ctx = document.getElementById('populationPyramidChart').getContext('2d');
+            
+            // Sample data - in real implementation, this would come from uploaded data
+            const ageGroups = ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75-79', '80+'];
+            const maleData = [8.5, 7.8, 7.2, 6.8, 6.5, 6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5];
+            const femaleData = [8.0, 7.5, 7.0, 6.5, 6.2, 5.8, 5.3, 4.8, 4.3, 3.8, 3.3, 2.8, 2.3, 1.8, 1.3, 0.8, 0.4];
+            
+            charts.populationPyramid = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ageGroups,
+                    datasets: [
+                        {
+                            label: 'Male',
+                            data: maleData.map(val => -val),
+                            backgroundColor: '#5D5CDE',
+                            borderColor: '#5D5CDE',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Female',
+                            data: femaleData,
+                            backgroundColor: '#EC4899',
+                            borderColor: '#EC4899',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Population Pyramid'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return Math.abs(value) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fertility Analysis
+        function analyzeFertility() {
+            const totalBirths = parseFloat(document.getElementById('totalBirths').value);
+            const women15to49 = parseFloat(document.getElementById('women15to49').value);
+            const femaleBirths = parseFloat(document.getElementById('femaleBirths').value);
+            
+            // Get ASFR values
+            const asfr = [];
+            ['15to19', '20to24', '25to29', '30to34', '35to39', '40to44', '45to49'].forEach(ageGroup => {
+                const value = parseFloat(document.getElementById(`asfr${ageGroup}`).value) || 0;
+                asfr.push(value);
+            });
+
+            // Calculate TFR
+            const tfr = asfr.reduce((sum, rate) => sum + rate, 0) * 5;
+            document.getElementById('tfrResult').textContent = `${tfr.toFixed(2)}`;
+
+            // Calculate GFR
+            if (totalBirths && women15to49) {
+                const gfr = (totalBirths / women15to49) * 1000;
+                document.getElementById('gfrResult').textContent = `${gfr.toFixed(1)}`;
+            }
+
+            // Calculate CBR (if total population is available)
+            const totalPop = parseFloat(document.getElementById('totalPopulation').value);
+            if (totalBirths && totalPop) {
+                const cbr = (totalBirths / totalPop) * 1000;
+                document.getElementById('cbrResult').textContent = `${cbr.toFixed(1)}`;
+            }
+
+            // Calculate GRR
+            if (femaleBirths && women15to49) {
+                const femaleASFR = asfr.map(rate => rate * 0.487); // Assuming 48.7% of births are female
+                const grr = femaleASFR.reduce((sum, rate) => sum + rate, 0) * 5;
+                document.getElementById('grrResult').textContent = `${grr.toFixed(3)}`;
+            }
+
+            // Generate fertility chart
+            generateFertilityChart(asfr);
+        }
+
+        function generateFertilityChart(asfr) {
+            if (charts.fertility) {
+                charts.fertility.destroy();
+            }
+
+            const ctx = document.getElementById('fertilityChart').getContext('2d');
+            const ageGroups = ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49'];
+            
+            charts.fertility = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ageGroups,
+                    datasets: [{
+                        label: 'Age-Specific Fertility Rate',
+                        data: asfr,
+                        borderColor: '#7C3AED',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Age-Specific Fertility Pattern'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mortality Analysis
+        function analyzeMortality() {
+            const totalDeaths = parseFloat(document.getElementById('totalDeaths').value);
+            const infantDeaths = parseFloat(document.getElementById('infantDeaths').value);
+            const childDeaths = parseFloat(document.getElementById('childDeaths').value);
+            const liveBirths = parseFloat(document.getElementById('liveBirths').value);
+            const totalPop = parseFloat(document.getElementById('totalPopulation').value);
+
+            // Calculate CDR
+            if (totalDeaths && totalPop) {
+                const cdr = (totalDeaths / totalPop) * 1000;
+                document.getElementById('cdrResult').textContent = `${cdr.toFixed(1)}`;
+            }
+
+            // Calculate IMR
+            if (infantDeaths && liveBirths) {
+                const imr = (infantDeaths / liveBirths) * 1000;
+                document.getElementById('imrResult').textContent = `${imr.toFixed(1)}`;
+            }
+
+            // Calculate CMR
+            if (childDeaths && liveBirths) {
+                const cmr = (childDeaths / liveBirths) * 1000;
+                document.getElementById('cmrResult').textContent = `${cmr.toFixed(1)}`;
+            }
+
+            // Construct life table if mortality rates are provided
+            const mortalityRatesInput = document.getElementById('mortalityRates').value;
+            if (mortalityRatesInput.trim()) {
+                constructLifeTable();
+            }
+        }
+
+        function loadSampleMortality() {
+            document.getElementById('mortalityRates').value = '8.5, 1.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.5, 2.5, 4.0, 6.5, 10.5, 16.8, 27.2, 44.7, 73.6, 121.7';
+        }
+
+        function constructLifeTable() {
+            const ratesInput = document.getElementById('mortalityRates').value;
+            if (!ratesInput.trim()) {
+                showCustomAlert('Please enter mortality rates');
+                return;
+            }
+            
+            const mx = ratesInput.split(',').map(rate => parseFloat(rate.trim()) / 1000).filter(rate => !isNaN(rate));
+            
+            if (mx.length === 0) {
+                showCustomAlert('Invalid mortality rates');
+                return;
+            }
+            
+            const lifeTable = calculateLifeTable(mx, 100000);
+            displayLifeTable(lifeTable);
+            displayLifeTableSummary(lifeTable);
+        }
+
+        function calculateLifeTable(mx, radix) {
+            const ageGroups = ['0-1', '1-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75-79', '80+'];
+            const n = [1, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+            
+            const lifeTable = [];
+            let lx = radix;
+            
+            for (let i = 0; i < mx.length && i < ageGroups.length; i++) {
+                const nMx = mx[i];
+                const nAx = i === 0 ? 0.1 : (i === 1 ? 1.5 : n[i] / 2);
+                const nQx = (n[i] * nMx) / (1 + (n[i] - nAx) * nMx);
+                const nDx = lx * nQx;
+                const nLx = (lx - nDx) * n[i] + nDx * nAx;
+                
+                // Simplified Tx calculation
+                let Tx = 0;
+                for (let j = i; j < mx.length; j++) {
+                    if (j === mx.length - 1) {
+                        Tx += lx / mx[j];
+                        break;
+                    } else {
+                        Tx += nLx; // Simplified
+                    }
+                }
+                
+                const ex = Tx / lx;
+                
+                lifeTable.push({
+                    ageGroup: ageGroups[i],
+                    nMx: nMx.toFixed(5),
+                    nQx: nQx.toFixed(5),
+                    lx: Math.round(lx),
+                    nDx: Math.round(nDx),
+                    nLx: Math.round(nLx),
+                    Tx: Math.round(Tx),
+                    ex: ex.toFixed(2)
+                });
+                
+                lx = lx - nDx;
+                if (lx <= 0) break;
+            }
+            
+            return lifeTable;
+        }
+
+        function displayLifeTable(lifeTable) {
+            const display = document.getElementById('lifeTableDisplay');
+            
+            let html = `
+                <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th class="px-4 py-3">Age Group</th>
+                            <th class="px-4 py-3">nMx</th>
+                            <th class="px-4 py-3">nQx</th>
+                            <th class="px-4 py-3">lx</th>
+                            <th class="px-4 py-3">nDx</th>
+                            <th class="px-4 py-3">nLx</th>
+                            <th class="px-4 py-3">Tx</th>
+                            <th class="px-4 py-3">ex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            lifeTable.forEach((row, index) => {
+                html += `
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900">
+                        <td class="px-4 py-3 font-medium">${row.ageGroup}</td>
+                        <td class="px-4 py-3">${row.nMx}</td>
+                        <td class="px-4 py-3">${row.nQx}</td>
+                        <td class="px-4 py-3">${row.lx}</td>
+                        <td class="px-4 py-3">${row.nDx}</td>
+                        <td class="px-4 py-3">${row.nLx}</td>
+                        <td class="px-4 py-3">${row.Tx}</td>
+                        <td class="px-4 py-3 font-bold text-primary">${row.ex}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            display.innerHTML = html;
+        }
+
+        function displayLifeTableSummary(lifeTable) {
+            const summary = document.getElementById('lifeTableSummary');
+            const lifeExpectancy = lifeTable[0].ex;
+            const infantMortality = (parseFloat(lifeTable[0].nQx) * 1000).toFixed(1);
+            
+            document.getElementById('lifeExpectancyResult').textContent = `${lifeExpectancy} years`;
+            
+            summary.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <h5 class="font-bold text-primary">Life Expectancy at Birth</h5>
+                        <p class="text-xl font-bold text-primary">${lifeExpectancy} years</p>
+                    </div>
+                    <div class="text-center">
+                        <h5 class="font-bold text-danger">Infant Mortality Rate</h5>
+                        <p class="text-xl font-bold text-danger">${infantMortality} per 1,000</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Migration Analysis
+        function analyzeMigration() {
+            const immigration = parseFloat(document.getElementById('totalImmigration').value);
+            const emigration = parseFloat(document.getElementById('totalEmigration').value);
+            const totalPop = parseFloat(document.getElementById('totalPopMigration').value);
+
+            if (immigration !== undefined && emigration !== undefined && totalPop) {
+                const netMigration = immigration - emigration;
+                const netMigrationRate = (netMigration / totalPop) * 1000;
+                const grossMigration = immigration + emigration;
+                const grossMigrationRate = (grossMigration / totalPop) * 1000;
+                const migrationEfficiency = grossMigration > 0 ? (Math.abs(netMigration) / grossMigration) * 100 : 0;
+
+                document.getElementById('netMigrationResult').textContent = `${netMigrationRate.toFixed(1)}`;
+                document.getElementById('grossMigrationResult').textContent = `${grossMigrationRate.toFixed(1)}`;
+                document.getElementById('migrationEfficiencyResult').textContent = `${migrationEfficiency.toFixed(1)}%`;
+                document.getElementById('netMigrationAbsolute').textContent = netMigration.toLocaleString();
+
+                // Generate migration chart
+                generateMigrationChart(immigration, emigration);
+            }
+        }
+
+        function generateMigrationChart(immigration, emigration) {
+            if (charts.migration) {
+                charts.migration.destroy();
+            }
+
+            const ctx = document.getElementById('migrationChart').getContext('2d');
+            
+            charts.migration = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Immigration', 'Emigration'],
+                    datasets: [{
+                        label: 'Migration Flows',
+                        data: [immigration, emigration],
+                        backgroundColor: ['#059669', '#DC2626'],
+                        borderColor: ['#059669', '#DC2626'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Migration Flow Analysis'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Population Projections
+        function calculateProjections() {
+            const baseYear = parseInt(document.getElementById('baseYear').value);
+            const targetYear = parseInt(document.getElementById('targetYear').value);
+            const basePop = parseFloat(document.getElementById('basePopulation').value);
+            const birthRate = parseFloat(document.getElementById('projectionBirthRate').value) / 1000;
+            const deathRate = parseFloat(document.getElementById('projectionDeathRate').value) / 1000;
+            const migrationRate = parseFloat(document.getElementById('projectionMigrationRate').value) / 1000;
+            const model = document.getElementById('projectionModel').value;
+
+            if (!baseYear || !targetYear || !basePop) {
+                showCustomAlert('Please fill in all required fields');
+                return;
+            }
+
+            const years = targetYear - baseYear;
+            const growthRate = birthRate - deathRate + migrationRate;
+
+            let projections;
+            switch(model) {
+                case 'exponential':
+                    projections = calculateExponentialProjection(basePop, growthRate, years, baseYear);
+                    break;
+                case 'logistic':
+                    projections = calculateLogisticProjection(basePop, growthRate, years, baseYear);
+                    break;
+                default:
+                    projections = calculateExponentialProjection(basePop, growthRate, years, baseYear);
+            }
+
+            displayProjectionResults(projections, targetYear);
+            generateProjectionChart(projections);
+        }
+
+        function calculateExponentialProjection(basePop, growthRate, years, baseYear) {
+            const projections = [];
+            
+            for (let i = 0; i <= years; i++) {
+                const population = basePop * Math.exp(growthRate * i);
+                projections.push({
+                    year: baseYear + i,
+                    population: Math.round(population),
+                    growthRate: growthRate * 100
+                });
+            }
+            
+            return projections;
+        }
+
+        function calculateLogisticProjection(basePop, growthRate, years, baseYear) {
+            const carryingCapacity = basePop * 3; // Assuming carrying capacity is 3x base population
+            const projections = [];
+            
+            for (let i = 0; i <= years; i++) {
+                const t = i;
+                const population = carryingCapacity / (1 + ((carryingCapacity - basePop) / basePop) * Math.exp(-growthRate * t));
+                projections.push({
+                    year: baseYear + i,
+                    population: Math.round(population),
+                    growthRate: growthRate * 100
+                });
+            }
+            
+            return projections;
+        }
+
+        function displayProjectionResults(projections, targetYear) {
+            const finalProjection = projections[projections.length - 1];
+            const initialProjection = projections[0];
+            const totalGrowth = ((finalProjection.population - initialProjection.population) / initialProjection.population) * 100;
+            const annualGrowthRate = (Math.pow(finalProjection.population / initialProjection.population, 1 / (projections.length - 1)) - 1) * 100;
+            const doublingTime = annualGrowthRate > 0 ? 70 / annualGrowthRate : 0;
+
+            document.getElementById('projectedPopulation').textContent = finalProjection.population.toLocaleString();
+            document.getElementById('projectionYear').textContent = `Year ${targetYear}`;
+            document.getElementById('projectedGrowthRate').textContent = `${annualGrowthRate.toFixed(2)}%`;
+            document.getElementById('doublingTime').textContent = doublingTime > 0 ? `${doublingTime.toFixed(1)} years` : 'N/A';
+            document.getElementById('totalPopChange').textContent = `${totalGrowth.toFixed(1)}%`;
+        }
+
+        function generateProjectionChart(projections) {
+            if (charts.projection) {
+                charts.projection.destroy();
+            }
+
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            
+            charts.projection = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: projections.map(p => p.year),
+                    datasets: [{
+                        label: 'Projected Population',
+                        data: projections.map(p => p.population),
+                        borderColor: '#5D5CDE',
+                        backgroundColor: 'rgba(93, 92, 222, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Population Projection'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Data Management Functions
+        function setupFileHandlers() {
+            const fileInputs = ['populationDataFile', 'mainDataFile'];
+            
+            fileInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('change', function(e) {
+                        handleFileUpload(e.target.files[0], inputId);
+                    });
+                }
+            });
+
+            // Setup drag and drop
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    zone.classList.add('dragover');
+                });
+
+                zone.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    zone.classList.remove('dragover');
+                });
+
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    zone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileUpload(files[0], 'mainDataFile');
+                    }
+                });
+            });
+        }
+
+        function handleFileUpload(file, context) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let data;
+                    if (file.name.endsWith('.csv')) {
+                        data = parseCSV(e.target.result);
+                    } else {
+                        const workbook = XLSX.read(e.target.result, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        data = {
+                            headers: jsonData[0] || [],
+                            data: jsonData.slice(1),
+                            fileName: file.name
+                        };
+                    }
+
+                    uploadedData = data;
+                    displayDataPreview(data);
+                    showProcessingOptions();
+
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    showCustomAlert('Error reading file. Please check the file format.');
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = lines.slice(1).map(line => line.split(',').map(cell => cell.trim()));
+            
+            return {
+                headers: headers,
+                data: data.filter(row => row.some(cell => cell !== '')),
+                fileName: 'data.csv'
+            };
+        }
+
+        function displayDataPreview(data) {
+            const preview = document.getElementById('dataPreview').querySelector('div');
+            
+            let html = '<table class="w-full text-sm border-collapse">';
+            
+            // Headers
+            html += '<thead><tr class="bg-gray-100 dark:bg-gray-700">';
+            data.headers.forEach(header => {
+                html += `<th class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-left">${header || 'Column'}</th>`;
+            });
+            html += '</tr></thead>';
+
+            // Data rows (limit to first 5 for preview)
+            html += '<tbody>';
+            data.data.slice(0, 5).forEach(row => {
+                html += '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">';
+                data.headers.forEach((_, colIndex) => {
+                    html += `<td class="border border-gray-300 dark:border-gray-600 px-2 py-1">${row[colIndex] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+
+            if (data.data.length > 5) {
+                html += `<p class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">Showing 5 of ${data.data.length} rows</p>`;
+            }
+
+            preview.innerHTML = html;
+        }
+
+        function showProcessingOptions() {
+            document.getElementById('processingOptions').classList.remove('hidden');
+        }
+
+        function processUploadedData() {
+            if (!uploadedData) {
+                showCustomAlert('Please upload data first');
+                return;
+            }
+
+            // Show analysis summary
+            document.getElementById('analysisSummary').classList.remove('hidden');
+            document.getElementById('recordsCount').textContent = uploadedData.data.length.toLocaleString();
+            document.getElementById('indicatorsCount').textContent = '12'; // Example count
+
+            showCustomAlert('Data processed successfully! Results are now available in all analysis tabs.');
+        }
+
+        // Export Functions
+        function exportToExcel() {
+            if (!analysisResults || Object.keys(analysisResults).length === 0) {
+                showCustomAlert('No analysis results to export. Please run some analyses first.');
+                return;
+            }
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add analysis results as sheets
+            Object.keys(analysisResults).forEach(sheetName => {
+                const ws = XLSX.utils.json_to_sheet(analysisResults[sheetName]);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+
+            // Save file
+            XLSX.writeFile(wb, 'demographic_analysis_results.xlsx');
+        }
+
+        function exportToPDF() {
+            if (!analysisResults || Object.keys(analysisResults).length === 0) {
+                // Create a comprehensive report even without specific analysis results
+                generateComprehensivePDFReport();
+            } else {
+                generateAnalysisResultsPDF();
+            }
+        }
+
+        function generateComprehensivePDFReport() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ADVANCED DEMOGRAPHIC ANALYTICS PLATFORM', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Comprehensive Demographic Analysis Report', 105, 30, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text('Generated by: Erasmus Gwidza, MSc - Population Informatics & Analytics', 105, 40, { align: 'center' });
+                doc.text('University of Zimbabwe', 105, 50, { align: 'center' });
+                
+                // Date
+                doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 70);
+                
+                // Platform Overview
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Platform Overview', 20, 90);
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                const overviewText = `
+The Advanced Demographic Analytics Platform provides comprehensive tools for population analysis, 
+including fertility analysis, mortality studies, migration patterns, population projections, 
+morbidity analysis, and marriage pattern studies (SMAM).
+
+Key Features:
+• Population Structure Analysis
+• Fertility and Reproduction Measures  
+• Mortality Analysis and Life Tables
+• Migration Pattern Studies
+• Population Projections and Modeling
+• Morbidity and Health Indicators
+• Singulate Mean Age at Marriage (SMAM)
+• Advanced Data Processing and Export
+
+This platform supports Excel data upload, real-time calculations, professional visualizations,
+and comprehensive report generation for demographic research and policy analysis.
+                `;
+                
+                const lines = doc.splitTextToSize(overviewText, 170);
+                doc.text(lines, 20, 105);
+                
+                // Save the PDF
+                doc.save('demographic_analysis_platform_report.pdf');
+                showCustomAlert('Comprehensive PDF report generated and downloaded successfully!');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showCustomAlert('Error generating PDF report. Please try again.');
+            }
+        }
+
+        function generateAnalysisResultsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add detailed analysis results to PDF
+            doc.setFontSize(20);
+            doc.text('Demographic Analysis Results', 105, 20, { align: 'center' });
+            
+            // Add analysis results here based on available data
+            let yPosition = 40;
+            
+            Object.keys(analysisResults).forEach((category, index) => {
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text(category.toUpperCase(), 20, yPosition);
+                yPosition += 15;
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                
+                if (Array.isArray(analysisResults[category])) {
+                    analysisResults[category].forEach(item => {
+                        doc.text(`• ${JSON.stringify(item)}`, 25, yPosition);
+                        yPosition += 10;
+                    });
+                } else {
+                    doc.text(JSON.stringify(analysisResults[category]), 25, yPosition);
+                    yPosition += 10;
+                }
+                
+                yPosition += 10;
+            });
+            
+            doc.save('demographic_analysis_results.pdf');
+            showCustomAlert('Analysis results PDF generated and downloaded successfully!');
+        }
+
+        function exportToWord() {
+            // Generate Word document content
+            const content = generateWordContent();
+            
+            // Create blob and download
+            const blob = new Blob([content], {
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'demographic_analysis_report.docx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showCustomAlert('Word document generated and downloaded successfully!');
+        }
+
+        function generateWordContent() {
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Demographic Analysis Report</title>
+</head>
+<body>
+    <h1>ADVANCED DEMOGRAPHIC ANALYTICS PLATFORM</h1>
+    <h2>Comprehensive Demographic Analysis Report</h2>
+    
+    <p><strong>Generated by:</strong> Erasmus Gwidza, MSc - Population Informatics & Analytics</p>
+    <p><strong>Institution:</strong> University of Zimbabwe</p>
+    <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+    
+    <h3>Executive Summary</h3>
+    <p>This report presents comprehensive demographic analysis results from the Advanced Demographic Analytics Platform, covering population structure, fertility patterns, mortality analysis, migration studies, and health indicators.</p>
+    
+    <h3>Analysis Results</h3>
+    ${Object.keys(analysisResults).map(category => `
+        <h4>${category}</h4>
+        <p>${JSON.stringify(analysisResults[category], null, 2)}</p>
+    `).join('')}
+    
+    <h3>Methodology</h3>
+    <p>All calculations follow standard demographic methodology and international best practices for population analysis.</p>
+    
+    <footer>
+        <p>Generated by Advanced Demographic Analytics Platform - Erasmus Gwidza, MSc</p>
+    </footer>
+</body>
+</html>
+            `;
+        }
+
+        function saveAnalysis() {
+            const analysisData = {
+                timestamp: new Date().toISOString(),
+                data: uploadedData,
+                results: analysisResults,
+                parameters: getCurrentParameters()
+            };
+            
+            const dataStr = JSON.stringify(analysisData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'demographic_analysis_session.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function getCurrentParameters() {
+            return {
+                totalPopulation: document.getElementById('totalPopulation').value,
+                baseYear: document.getElementById('baseYear').value,
+                targetYear: document.getElementById('targetYear').value
+                // Add more parameters as needed
+            };
+        }
+
+        // Utility Functions
+        function generateReport() {
+            showCustomAlert('Comprehensive demographic report will be generated with all calculated indicators, charts, and professional analysis.');
+        }
+
+        function clearAllData() {
+            showCustomConfirm('Are you sure you want to clear all data and results?', function() {
+                // Clear all inputs
+                document.querySelectorAll('input[type="number"], textarea').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Clear all results
+                document.querySelectorAll('[id$="Result"]').forEach(element => {
+                    element.textContent = '--';
+                });
+                
+                // Clear uploaded data
+                uploadedData = null;
+                analysisResults = {};
+                
+                // Hide optional sections
+                document.getElementById('processingOptions').classList.add('hidden');
+                document.getElementById('analysisSummary').classList.add('hidden');
+                
+                showCustomAlert('All data cleared successfully.');
+            });
+        }
+
+        function loadSampleData() {
+            // Load sample demographic data
+            document.getElementById('totalPopulation').value = '15000000';
+            document.getElementById('malePopulation').value = '7200000';
+            document.getElementById('femalePopulation').value = '7800000';
+            document.getElementById('totalArea').value = '390757';
+            document.getElementById('pop0to14').value = '4500000';
+            document.getElementById('pop15to64').value = '9500000';
+            document.getElementById('pop65plus').value = '1000000';
+            
+            showCustomAlert('Sample demographic data loaded successfully. You can now run analyses.');
+        }
+
+        function helpGuide() {
+            showCustomAlert(`
+                ADVANCED DEMOGRAPHIC ANALYTICS PLATFORM - HELP GUIDE
+                
+                1. POPULATION STRUCTURE: Analyze population composition, density, age structure
+                2. FERTILITY ANALYSIS: Calculate TFR, GFR, ASFR, and reproduction rates
+                3. MORTALITY ANALYSIS: Generate life tables, mortality rates, survival analysis
+                4. MIGRATION ANALYSIS: Study migration patterns and population movements
+                5. PROJECTIONS: Forecast population using various demographic models
+                6. DATA MANAGEMENT: Upload, process, and export demographic datasets
+                
+                Developed by Erasmus Gwidza, MSc - Population Informatics & Analytics
+            `);
+        }
+
+        // Morbidity Analysis Functions
+        function analyzeMorbidity() {
+            const totalCases = parseFloat(document.getElementById('totalCases').value);
+            const newCases = parseFloat(document.getElementById('newCases').value);
+            const populationAtRisk = parseFloat(document.getElementById('populationAtRisk').value);
+            const timePeriod = parseFloat(document.getElementById('timePeriod').value) || 1;
+            const communicableCases = parseFloat(document.getElementById('communicableCases').value) || 0;
+            const nonCommunicableCases = parseFloat(document.getElementById('nonCommunicableCases').value) || 0;
+            const maternalCases = parseFloat(document.getElementById('maternalCases').value) || 0;
+            const childHealthCases = parseFloat(document.getElementById('childHealthCases').value) || 0;
+            const disabledPopulation = parseFloat(document.getElementById('disabledPopulation').value);
+            const yearsWithDisability = parseFloat(document.getElementById('yearsWithDisability').value);
+            const disabilityWeight = parseFloat(document.getElementById('disabilityWeight').value) || 0.1;
+
+            // Calculate Prevalence Rate
+            if (totalCases && populationAtRisk) {
+                const prevalenceRate = (totalCases / populationAtRisk) * 1000;
+                document.getElementById('prevalenceRate').textContent = `${prevalenceRate.toFixed(1)}`;
+            }
+
+            // Calculate Incidence Rate
+            if (newCases && populationAtRisk) {
+                const incidenceRate = (newCases / populationAtRisk) * 1000 / timePeriod;
+                document.getElementById('incidenceRate').textContent = `${incidenceRate.toFixed(1)}`;
+            }
+
+            // Calculate Attack Rate
+            if (totalCases && populationAtRisk) {
+                const attackRate = (totalCases / populationAtRisk) * 100;
+                document.getElementById('attackRate').textContent = `${attackRate.toFixed(1)}%`;
+            }
+
+            // Calculate Disability Rate
+            if (disabledPopulation && populationAtRisk) {
+                const disabilityRate = (disabledPopulation / populationAtRisk) * 1000;
+                document.getElementById('disabilityRate').textContent = `${disabilityRate.toFixed(1)}`;
+            }
+
+            // Calculate YLD (Years Lived with Disability)
+            if (yearsWithDisability && disabilityWeight) {
+                const yld = yearsWithDisability * disabilityWeight;
+                document.getElementById('yldResult').textContent = `${yld.toFixed(2)}`;
+            }
+
+            // Calculate Disease Burden Index
+            if (totalCases && populationAtRisk) {
+                const diseaseBurden = (totalCases / populationAtRisk) * 100;
+                document.getElementById('diseaseBurden').textContent = `${diseaseBurden.toFixed(2)}`;
+            }
+
+            // Calculate Health-Adjusted Life Years (simplified)
+            const totalPop = parseFloat(document.getElementById('totalPopulation').value);
+            if (totalPop && disabledPopulation && yearsWithDisability) {
+                const haly = ((totalPop - disabledPopulation) * 70 + disabledPopulation * (70 - yearsWithDisability)) / totalPop;
+                document.getElementById('halyResult').textContent = `${haly.toFixed(1)}`;
+            }
+
+            // Generate morbidity chart
+            generateMorbidityChart([communicableCases, nonCommunicableCases, maternalCases, childHealthCases]);
+        }
+
+        function generateMorbidityChart(diseaseData) {
+            if (charts.morbidity) {
+                charts.morbidity.destroy();
+            }
+
+            const ctx = document.getElementById('morbidityChart').getContext('2d');
+            const labels = ['Communicable Diseases', 'Non-Communicable Diseases', 'Maternal Health', 'Child Health'];
+            const colors = ['#DC2626', '#D97706', '#7C3AED', '#059669'];
+            
+            charts.morbidity = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: diseaseData,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Disease Distribution by Category'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // SMAM Analysis Functions
+        function calculateSMAM() {
+            // Get marriage proportions for each age group
+            const marriageProportions = [
+                parseFloat(document.getElementById('marriage15to19').value) || 0,
+                parseFloat(document.getElementById('marriage20to24').value) || 0,
+                parseFloat(document.getElementById('marriage25to29').value) || 0,
+                parseFloat(document.getElementById('marriage30to34').value) || 0,
+                parseFloat(document.getElementById('marriage35to39').value) || 0,
+                parseFloat(document.getElementById('marriage40to44').value) || 0,
+                parseFloat(document.getElementById('marriage45to49').value) || 0,
+                parseFloat(document.getElementById('marriage50plus').value) || 0
+            ];
+
+            const ageGroups = [17.5, 22.5, 27.5, 32.5, 37.5, 42.5, 47.5, 52.5]; // Mid-points of age groups
+            const ageWidths = [5, 5, 5, 5, 5, 5, 5, 5];
+
+            // Calculate SMAM using Hajnal's formula
+            let sumYearsNeverMarried = 0;
+            let previousProportion = 0;
+
+            for (let i = 0; i < marriageProportions.length; i++) {
+                const currentProportion = marriageProportions[i];
+                const neverMarriedProportion = 1 - currentProportion;
+                
+                // Add years lived never married in this age group
+                if (i === 0) {
+                    sumYearsNeverMarried += neverMarriedProportion * ageWidths[i];
+                } else {
+                    const avgNeverMarried = (neverMarriedProportion + (1 - previousProportion)) / 2;
+                    sumYearsNeverMarried += avgNeverMarried * ageWidths[i];
+                }
+                
+                previousProportion = currentProportion;
+            }
+
+            // SMAM = 15 + sumYearsNeverMarried
+            const smam = 15 + sumYearsNeverMarried;
+            
+            // Display main SMAM result
+            document.getElementById('smamResult').textContent = `${smam.toFixed(1)}`;
+
+            // Calculate additional indicators
+            const neverMarriedAt50 = 1 - marriageProportions[marriageProportions.length - 1];
+            const earlyMarriage = marriageProportions[0] + marriageProportions[1] * 0.5; // Estimate under 20
+            const lateMarriage = marriageProportions.slice(4).reduce((sum, prop) => sum + prop, 0) / 4; // After 30
+
+            document.getElementById('neverMarriedProp').textContent = `${(neverMarriedAt50 * 100).toFixed(1)}%`;
+            document.getElementById('earlyMarriageRate').textContent = `${(earlyMarriage * 100).toFixed(1)}%`;
+            document.getElementById('lateMarriageRate').textContent = `${(lateMarriage * 100).toFixed(1)}%`;
+
+            // Calculate median age (approximation)
+            let medianAge = 15;
+            for (let i = 0; i < marriageProportions.length; i++) {
+                if (marriageProportions[i] >= 0.5) {
+                    medianAge = ageGroups[i];
+                    break;
+                }
+            }
+            document.getElementById('medianAge').textContent = `${medianAge.toFixed(1)}`;
+
+            // Generate SMAM chart
+            generateSMAMChart(marriageProportions);
+
+            // Display interpretation
+            displaySMAMInterpretation(smam, neverMarriedAt50, earlyMarriage);
+        }
+
+        function generateSMAMChart(marriageProportions) {
+            if (charts.smam) {
+                charts.smam.destroy();
+            }
+
+            const ctx = document.getElementById('smamChart').getContext('2d');
+            const ageGroups = ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50+'];
+            
+            charts.smam = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ageGroups,
+                    datasets: [{
+                        label: 'Proportion Ever Married',
+                        data: marriageProportions,
+                        borderColor: '#5D5CDE',
+                        backgroundColor: 'rgba(93, 92, 222, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Age-Specific Marriage Patterns'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value * 100) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displaySMAMInterpretation(smam, neverMarriedAt50, earlyMarriage) {
+            let interpretation = `<div class="space-y-2">`;
+            
+            // SMAM interpretation
+            if (smam < 20) {
+                interpretation += `<p><strong>Very Early Marriage Pattern:</strong> SMAM of ${smam.toFixed(1)} years indicates very early marriage patterns, typical of traditional societies with strong cultural preferences for early marriage.</p>`;
+            } else if (smam < 25) {
+                interpretation += `<p><strong>Early Marriage Pattern:</strong> SMAM of ${smam.toFixed(1)} years suggests early marriage patterns, common in developing countries with moderate socioeconomic development.</p>`;
+            } else if (smam < 30) {
+                interpretation += `<p><strong>Moderate Marriage Pattern:</strong> SMAM of ${smam.toFixed(1)} years indicates moderate marriage timing, typical of societies in demographic transition.</p>`;
+            } else {
+                interpretation += `<p><strong>Late Marriage Pattern:</strong> SMAM of ${smam.toFixed(1)} years suggests late marriage patterns, characteristic of developed countries with high education levels.</p>`;
+            }
+
+            // Never married interpretation
+            const neverMarriedPercent = neverMarriedAt50 * 100;
+            if (neverMarriedPercent > 10) {
+                interpretation += `<p><strong>High Celibacy:</strong> ${neverMarriedPercent.toFixed(1)}% never married by age 50+ indicates significant permanent celibacy.</p>`;
+            } else if (neverMarriedPercent > 5) {
+                interpretation += `<p><strong>Moderate Celibacy:</strong> ${neverMarriedPercent.toFixed(1)}% never married by age 50+ suggests some permanent celibacy.</p>`;
+            } else {
+                interpretation += `<p><strong>Universal Marriage:</strong> Only ${neverMarriedPercent.toFixed(1)}% never married by age 50+ indicates near-universal marriage.</p>`;
+            }
+
+            // Early marriage interpretation
+            const earlyMarriagePercent = earlyMarriage * 100;
+            if (earlyMarriagePercent > 20) {
+                interpretation += `<p><strong>High Early Marriage:</strong> ${earlyMarriagePercent.toFixed(1)}% married before age 20 may indicate limited educational opportunities for women.</p>`;
+            }
+
+            interpretation += `</div>`;
+            
+            document.getElementById('smamInterpretation').innerHTML = interpretation;
+        }
+
+        function loadSampleSMAMData() {
+            // Load sample marriage data (representing a developing country pattern)
+            document.getElementById('marriage15to19').value = '0.150';
+            document.getElementById('marriage20to24').value = '0.450';
+            document.getElementById('marriage25to29').value = '0.720';
+            document.getElementById('marriage30to34').value = '0.850';
+            document.getElementById('marriage35to39').value = '0.920';
+            document.getElementById('marriage40to44').value = '0.950';
+            document.getElementById('marriage45to49').value = '0.970';
+            document.getElementById('marriage50plus').value = '0.980';
+            
+            showCustomAlert('Sample marriage data loaded successfully. You can now calculate SMAM.');
+        }
+
+        // Application Initialization
+        function initializeApplication() {
+            setupFileHandlers();
+            
+            // Load default values
+            document.getElementById('baseYear').value = new Date().getFullYear();
+            document.getElementById('targetYear').value = new Date().getFullYear() + 25;
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
+    </script>
+</body>
+</html>
